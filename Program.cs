@@ -1,14 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using ExpenseTrackerApi.Models;
+using ExpenseTrackerApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<ExpenseContext>(opt => opt.UseInMemoryDatabase("ExpenseTrackerDb"));
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("DB Connection string was not found.");
+
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
@@ -22,10 +23,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.MapGet("/health", () => "I'm alive!");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Urls.Add("http://0.0.0.0:8080");
 
 app.Run();

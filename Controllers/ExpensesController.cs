@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ExpenseTrackerApi.Models;
+using ExpenseTrackerApi.Data;
 
 namespace ExpenseTrackerApi.Controllers
 {
@@ -8,9 +9,9 @@ namespace ExpenseTrackerApi.Controllers
     [ApiController]
     public class ExpensesController : ControllerBase
     {
-        private readonly ExpenseContext _context;
+        private readonly AppDbContext _context;
 
-        public ExpensesController(ExpenseContext context)
+        public ExpensesController(AppDbContext context)
         {
             _context = context;
         }
@@ -19,14 +20,14 @@ namespace ExpenseTrackerApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
         {
-            return await _context.Expense.ToListAsync();
+            return await _context.Expenses.ToListAsync();
         }
 
         // GET: api/Expenses/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpense(long id)
         {
-            var expense = await _context.Expense.FindAsync(id);
+            var expense = await _context.Expenses.FindAsync(id);
 
             if (expense == null)
             {
@@ -72,7 +73,7 @@ namespace ExpenseTrackerApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Expense>> PostExpense(Expense expense)
         {
-            _context.Expense.Add(expense);
+            _context.Expenses.Add(expense);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetExpense", new { id = expense.Id }, expense);
@@ -82,13 +83,13 @@ namespace ExpenseTrackerApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(long id)
         {
-            var expense = await _context.Expense.FindAsync(id);
+            var expense = await _context.Expenses.FindAsync(id);
             if (expense == null)
             {
                 return NotFound();
             }
 
-            _context.Expense.Remove(expense);
+            _context.Expenses.Remove(expense);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -96,7 +97,7 @@ namespace ExpenseTrackerApi.Controllers
 
         private bool ExpenseExists(long id)
         {
-            return _context.Expense.Any(e => e.Id == id);
+            return _context.Expenses.Any(e => e.Id == id);
         }
     }
 }
